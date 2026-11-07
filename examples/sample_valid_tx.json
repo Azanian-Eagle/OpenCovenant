@@ -1,0 +1,22 @@
+{
+  "id": "tx_sample_sarb_001",
+  "description": "Tuition payment with 15% VAT",
+  "timestamp_epoch_sec": 1710000000,
+  "postings": [
+    {
+      "account": "Bank:Settlement",
+      "entry_type": "Debit",
+      "amount": { "cents": 11500 }
+    },
+    {
+      "account": "Revenue:Tuition",
+      "entry_type": "Credit",
+      "amount": { "cents": 10000 }
+    },
+    {
+      "account": "Tax:SARS_VAT_Output",
+      "entry_type": "Credit",
+      "amount": { "cents": 1500 }
+    }
+  ]
+}

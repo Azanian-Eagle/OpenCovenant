@@ -1,0 +1,44 @@
+// File: contracts/ai_mcp_guard_pipeline.vela
+// Azanian Eagle & OpenCovenant — OpenAegis AI Agent MCP Egress Firewall Contract
+module azanian_eagle.openaegis.mcp version "1.0.0";
+
+import std::regulations::{POPIA, GDPR};
+import std::pii::{ZA_IDNumber, APIKeySecret};
+import std::crypto::{blake3_salted};
+import std::redact::{strip_inline_pii, redact_canary_tokens};
+import std::sinks::{SovereignPostgresZA, ExternalMCPHost};
+import std::ai::mcp_guard::{McpToolCall, EgressScanner};
+
+schema AgentToolExecutionPayload {
+  developer_sa_id: tainted<ZA_IDNumber, POPIA::Section26_SpecialPersonal>,
+  session_token:   tainted<APIKeySecret, POPIA::Section19_Personal>,
+  tool_name:       public<String>,
+  raw_user_prompt: ephemeral<String, ttl = 0s, jurisdiction = "af-south-1">,
+  agent_uuid:      public<UUIDv7>
+}
+
+covenant AgentMcpFirewallEgress(input: AgentToolExecutionPayload) -> (
+  audit_db:    SovereignPostgresZA,
+  mcp_egress:  ExternalMCPHost
+) {
+  invariant BlockUnauthorizedShell {
+    when input.tool_name == "bash" => forbid_sink(input.raw_user_prompt, ExternalMCPHost);
+  }
+
+  let sanitized_prompt: sanitized<String> = input.raw_user_prompt
+    |> strip_inline_pii(patterns = [ZA_IDNumber, APIKeySecret]);
+
+  let anon_dev_hash: sanitized<FixedBytes<32>> = input.developer_sa_id
+    |> blake3_salted(secret_env = "VELA_SA_ID_PEPPER");
+
+  emit audit_db {
+    dev_hash:   anon_dev_hash,
+    tool_name:  input.tool_name,
+    agent_id:   input.agent_uuid
+  };
+
+  emit mcp_egress {
+    tool:   input.tool_name,
+    prompt: sanitized_prompt
+  };
+}

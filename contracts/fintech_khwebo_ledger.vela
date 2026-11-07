@@ -1,0 +1,49 @@
+// File: contracts/fintech_khwebo_ledger.vela
+// Azanian Eagle & OpenCovenant — SARB / NPS-Core & POPIA Compliant FinTech Ledger Contract
+module azanian_eagle.khwebo.ledger version "1.0.0";
+
+import std::regulations::{POPIA, SARB_NPS};
+import std::pii::{ZA_IDNumber, BankAccountNumber};
+import std::crypto::{blake3_salted, aes256_gcm_encrypt};
+import std::redact::{mask_keep_last4};
+import std::sinks::{SovereignPostgresZA, AuditLedgerSink};
+import std::ledger::{ZarAmount, SARS_VAT_15};
+
+schema EscrowTransferPayload {
+  sender_id_num:      tainted<ZA_IDNumber, POPIA::Section26_SpecialPersonal>,
+  sender_bank_acc:    tainted<BankAccountNumber, POPIA::Section19_Personal>,
+  recipient_bank_acc: tainted<BankAccountNumber, POPIA::Section19_Personal>,
+  gross_amount_cents: public<u64>,
+  transaction_nonce:  public<UUIDv7>
+}
+
+covenant KhweboEscrowSettlement(input: EscrowTransferPayload) -> (
+  db_record:    SovereignPostgresZA,
+  audit_ledger: AuditLedgerSink
+) {
+  invariant LedgerBankRetention {
+    when input.gross_amount_cents > 0 => forbid_sink(input.sender_bank_acc, AuditLedgerSink);
+  }
+
+  let masked_sender_acc: sanitized<String> = input.sender_bank_acc
+    |> mask_keep_last4();
+
+  let masked_recipient_acc: sanitized<String> = input.recipient_bank_acc
+    |> mask_keep_last4();
+
+  let anon_sender_hash: sanitized<FixedBytes<32>> = input.sender_id_num
+    |> blake3_salted(secret_env = "VELA_SA_ID_PEPPER");
+
+  emit db_record {
+    sender_hash:          anon_sender_hash,
+    sender_masked_acc:    masked_sender_acc,
+    recipient_masked_acc: masked_recipient_acc,
+    gross_cents:          input.gross_amount_cents,
+    tx_nonce:             input.transaction_nonce
+  };
+
+  emit audit_ledger {
+    tx_nonce:    input.transaction_nonce,
+    sender_hash: anon_sender_hash
+  };
+}

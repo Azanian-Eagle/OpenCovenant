@@ -1,0 +1,22 @@
+name: OpenCovenant & Vela Compiler CI
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  test-and-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - name: Run Workspace Unit Tests
+        run: cargo test --workspace
+      - name: Verify EduHelp POPIA Sovereignty Contract
+        run: cargo run --bin velac -- check contracts/edtech_popia_guard.vela
+      - name: Generate Polyglot SDKs & SQL RLS
+        run: cargo run --bin velac -- build contracts/edtech_popia_guard.vela --out-dir ./gen
+      - name: Emit Signed Compliance Attestation
+        run: cargo run --bin velac -- audit contracts/edtech_popia_guard.vela

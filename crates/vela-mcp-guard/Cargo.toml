@@ -1,0 +1,14 @@
+[package]
+name = "vela-mcp-guard"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+description = "std::ai::mcp_guard (OpenAegis) - AI Agent and Model Context Protocol (MCP) firewall and sandboxing engine"
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+sha2 = { workspace = true }
+hex = { workspace = true }
