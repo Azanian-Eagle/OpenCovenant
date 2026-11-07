@@ -1,0 +1,11 @@
+[package]
+name = "vela-codegen"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+description = "Multi-target code generator for Vela (.vela) emitting Rust, TypeScript, Python, and PostgreSQL RLS"
+
+[dependencies]
+vela-parser = { path = "../vela-parser" }
+serde.workspace = true

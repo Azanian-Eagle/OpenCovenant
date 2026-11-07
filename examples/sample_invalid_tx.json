@@ -1,0 +1,17 @@
+{
+  "id": "tx_sample_invalid_002",
+  "description": "Invalid unbalanced transaction",
+  "timestamp_epoch_sec": 1710000000,
+  "postings": [
+    {
+      "account": "Bank:Settlement",
+      "entry_type": "Debit",
+      "amount": { "cents": 10000 }
+    },
+    {
+      "account": "Revenue:Tuition",
+      "entry_type": "Credit",
+      "amount": { "cents": 8000 }
+    }
+  ]
+}

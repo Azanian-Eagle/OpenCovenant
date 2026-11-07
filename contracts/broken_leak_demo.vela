@@ -1,0 +1,25 @@
+// File: contracts/broken_leak_demo.vela
+// Run `cargo run --bin velac -- check contracts/broken_leak_demo.vela`
+// to watch the Vela compiler catch both a POPIA Sec. 26 SA ID leak and a Sec. 35 minor data violation!
+module azanian_eagle.demo.violation version "0.1.0";
+
+import std::regulations::POPIA;
+
+schema UnsafeLearnerPayload {
+  learner_sa_id:     tainted<ZA_IDNumber, POPIA::Section26_SpecialPersonal>,
+  curriculum_prompt: ephemeral<MinorTranscript, ttl = 0s, jurisdiction = "af-south-1">
+}
+
+covenant LeakyTutorEndpoint(input: UnsafeLearnerPayload) -> (
+  db_record: SovereignPostgresZA
+) {
+  invariant MinorZeroServerRetention {
+    when input.age_years < 18 => forbid_sink(input.curriculum_prompt, SovereignPostgresZA);
+  }
+
+  // VIOLATION: Emitting raw tainted SA ID and ttl=0s minor transcript directly to Postgres!
+  emit db_record {
+    raw_id:     input.learner_sa_id,
+    raw_prompt: input.curriculum_prompt
+  };
+}

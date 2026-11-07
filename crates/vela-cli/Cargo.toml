@@ -1,0 +1,25 @@
+[package]
+name = "vela-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+description = "The Vela Compiler CLI (velac) for checking, proving, auditing, and building .vela contracts"
+
+[[bin]]
+name = "velac"
+path = "src/main.rs"
+
+[dependencies]
+vela-lexer = { path = "../vela-lexer" }
+vela-parser = { path = "../vela-parser" }
+vela-typeck = { path = "../vela-typeck" }
+vela-codegen = { path = "../vela-codegen" }
+vela-mcp-guard = { path = "../vela-mcp-guard" }
+vela-ledger = { path = "../vela-ledger" }
+ariadne.workspace = true
+clap.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+hex.workspace = true
