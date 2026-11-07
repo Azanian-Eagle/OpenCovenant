@@ -70,18 +70,21 @@ fn main() -> ExitCode {
                 let ts_path = out_dir.join("opencovenant_client.ts");
                 let py_path = out_dir.join("opencovenant_guard.py");
                 let sql_path = out_dir.join("sovereign_rls.sql");
+                let prov_path = out_dir.join("provenance.json");
 
                 fs::write(&ts_path, targets.typescript_sdk).unwrap();
                 fs::write(&py_path, targets.python_middleware).unwrap();
                 fs::write(&sql_path, targets.postgres_rls_sql).unwrap();
+                fs::write(&prov_path, targets.provenance_manifest).unwrap();
 
                 println!(
-                    "🚀 [VELAC BUILD] Successfully compiled '{}' (v{}) into 3 targets:",
+                    "🚀 [VELAC BUILD] Successfully compiled '{}' (v{}) into 4 targets:",
                     report.module_name, report.version
                 );
                 println!("   • TypeScript/React SDK: {}", ts_path.display());
                 println!("   • Python FastAPI Guard: {}", py_path.display());
                 println!("   • PostgreSQL RLS DDL:   {}", sql_path.display());
+                println!("   • Provenance Manifest:  {}", prov_path.display());
                 ExitCode::SUCCESS
             }
             Err(_) => ExitCode::FAILURE,

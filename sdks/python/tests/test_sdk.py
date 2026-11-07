@@ -3,6 +3,7 @@ from azanian_eagle_opencovenant import (
     strip_inline_pii,
     blake3_or_sha256_salted,
     CovenantGuard,
+    PROVENANCE,
 )
 
 
@@ -49,6 +50,11 @@ class TestOpenCovenantPythonSdk(unittest.TestCase):
                 }
             )
         self.assertIn("POPIA Section 35 Violation", str(ctx.exception))
+
+    def test_provenance_metadata(self):
+        self.assertEqual(PROVENANCE["authority"], "Azanian-Eagle/OpenCovenant")
+        self.assertEqual(PROVENANCE["jurisdiction"], "af-south-1")
+        self.assertIn("Romeo Mngqibisa", PROVENANCE["signer"])
 
 
 if __name__ == "__main__":

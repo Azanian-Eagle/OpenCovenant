@@ -12,6 +12,18 @@ from typing import Any, Dict
 
 __version__ = "0.1.0"
 
+PROVENANCE = {
+    "authority": "Azanian-Eagle/OpenCovenant",
+    "signer": "Romeo Mngqibisa <romeomngqibisa@gmail.com>",
+    "jurisdiction": "af-south-1",
+    "statutory_frameworks": [
+        "POPIA (South Africa)",
+        "GDPR (EU)",
+        "CCPA (California)",
+        "SARB NPS",
+    ],
+}
+
 
 def strip_inline_pii(text: str) -> str:
     """Strips South African ID numbers, emails, and phone numbers."""

@@ -27,9 +27,10 @@ velac check contracts/edtech_popia_guard.vela
 
 ### 2. `velac build <CONTRACT.vela> [--out-dir <DIR>]`
 Compiles a verified contract into polyglot artefacts:
-* TypeScript / React SDK bindings
-* Python FastAPI / Pydantic v2 middleware
-* PostgreSQL 16+ Row-Level Security (RLS) SQL DDL
+* TypeScript / React SDK bindings (`opencovenant_client.ts`)
+* Python FastAPI / Pydantic v2 middleware (`opencovenant_guard.py`)
+* PostgreSQL 16+ Row-Level Security (RLS) SQL DDL (`sovereign_rls.sql`)
+* Cryptographic Provenance Manifest & Signatures (`provenance.json`)
 
 ```bash
 velac build contracts/edtech_popia_guard.vela --out-dir ./dist

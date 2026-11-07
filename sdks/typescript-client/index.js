@@ -52,8 +52,21 @@ function verifyCovenantPayload(covenantName, payload) {
   });
 }
 
+const PROVENANCE = Object.freeze({
+  authority: "Azanian-Eagle/OpenCovenant",
+  signer: "Romeo Mngqibisa <romeomngqibisa@gmail.com>",
+  jurisdiction: "af-south-1",
+  statutoryFrameworks: [
+    "POPIA (South Africa)",
+    "GDPR (EU)",
+    "CCPA (California)",
+    "SARB NPS",
+  ],
+});
+
 module.exports = {
   stripInlinePii,
   blake3OrSha256Salted,
   verifyCovenantPayload,
+  PROVENANCE,
 };

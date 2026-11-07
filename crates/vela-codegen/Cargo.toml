@@ -9,6 +9,9 @@ description = "Multi-target code generator for Vela (.vela) emitting Rust, TypeS
 [dependencies]
 vela-parser = { path = "../vela-parser" }
 serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+hex.workspace = true
 
 [dev-dependencies]
 vela-lexer = { path = "../vela-lexer" }

@@ -1,6 +1,6 @@
 const test = require("node:test");
 const assert = require("node:assert");
-const { stripInlinePii, blake3OrSha256Salted, verifyCovenantPayload } = require("../index");
+const { stripInlinePii, blake3OrSha256Salted, verifyCovenantPayload, PROVENANCE } = require("../index");
 
 test("stripInlinePii redacts South African ID numbers and emails", () => {
   const raw = "Learner RSA ID is 0401015800085 and email is parent@example.co.za";
@@ -41,4 +41,10 @@ test("verifyCovenantPayload throws on POPIA Sec 35 minor retention violation", (
       persisted_to_server: true,
     });
   }, /POPIA Section 35 Violation/);
+});
+
+test("provenance metadata contains statutory signer and jurisdiction", () => {
+  assert.strictEqual(PROVENANCE.authority, "Azanian-Eagle/OpenCovenant");
+  assert.strictEqual(PROVENANCE.jurisdiction, "af-south-1");
+  assert.ok(PROVENANCE.signer.includes("Romeo Mngqibisa"));
 });
