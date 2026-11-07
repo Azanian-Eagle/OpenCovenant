@@ -45,20 +45,32 @@ Following the multi-ecosystem engineering playbook of **OpenSentinel (v1.1.1)**,
 
 ## 🚀 Quickstart Guide
 
-### 1. Installation
+### 1. Installation & Running Tests
 
-Install the reference Vela compiler (`velac`) via Cargo:
-
-```bash
-cargo install velac
-```
-
-Or clone the repository to build locally:
+Clone the repository and run test suites across all ecosystem registries:
 
 ```bash
 git clone https://github.com/Azanian-Eagle/OpenCovenant.git
 cd OpenCovenant
-cargo build --release
+
+# A. Run Rust compiler workspace tests & linters
+cargo test --workspace
+cargo clippy --all-targets -- -D warnings
+
+# B. Run TypeScript Client SDK tests (NPM: @azanian-eagle/opencovenant-client)
+cd sdks/typescript-client && npm test && cd ../..
+
+# C. Run React SDK tests (NPM: @azanian-eagle/opencovenant-react)
+cd sdks/react && npm test && cd ../..
+
+# D. Run Python SDK tests (PyPI: azanian-eagle-opencovenant)
+cd sdks/python && PYTHONPATH=. python3 -m unittest discover -s tests -p "test_*.py" && cd ../..
+```
+
+Install the reference Vela compiler CLI (`velac`):
+
+```bash
+cargo install --path crates/vela-cli
 ```
 
 ### 2. Verify a Compliant Contract

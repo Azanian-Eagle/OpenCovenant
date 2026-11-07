@@ -34,13 +34,13 @@ fn emit_typescript(ast: &ModuleAst) -> String {
                 _ => "string",
             };
             let comment = match f.ty.kind {
-                ProvenanceKind::Tainted => " // TAINTED: Must be sanitized before export",
-                ProvenanceKind::Ephemeral => " // EPHEMERAL: Zero-retention client-side only",
-                ProvenanceKind::Sanitized => " // SANITIZED: Cryptographically safe",
-                ProvenanceKind::Public => " // PUBLIC",
+                ProvenanceKind::Tainted => " /* TAINTED: Must be sanitized before export */",
+                ProvenanceKind::Ephemeral => " /* EPHEMERAL: Zero-retention client-side only */",
+                ProvenanceKind::Sanitized => " /* SANITIZED: Cryptographically safe */",
+                ProvenanceKind::Public => " /* PUBLIC */",
                 ProvenanceKind::Primitive => "",
             };
-            out.push_str(&format!("  {}: {}{};\n", f.name, ts_ty, comment));
+            out.push_str(&format!("  {}: {};{}\n", f.name, ts_ty, comment));
         }
         out.push_str("}\n\n");
     }

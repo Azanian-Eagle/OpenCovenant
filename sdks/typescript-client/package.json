@@ -1,0 +1,22 @@
+{
+  "name": "@azanian-eagle/opencovenant-client",
+  "version": "0.1.0",
+  "description": "TypeScript SDK for OpenCovenant and the Vela Programming Language (.vela)",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "commonjs",
+  "scripts": {
+    "test": "node --test test/**/*.test.js"
+  },
+  "keywords": [
+    "opencovenant",
+    "vela",
+    "popia",
+    "gdpr",
+    "sovereignty",
+    "taint-tracking",
+    "azanian-eagle"
+  ],
+  "author": "Romeo Mngqibisa <romeomngqibisa@gmail.com> (Azanian Eagle)",
+  "license": "MIT OR Apache-2.0"
+}

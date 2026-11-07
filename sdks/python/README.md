@@ -20,6 +20,14 @@ poetry add azanian-eagle-opencovenant
 uv add azanian-eagle-opencovenant
 ```
 
+## Running Tests
+
+Execute the unit test suite:
+
+```bash
+PYTHONPATH=. python3 -m unittest discover -s tests -p "test_*.py"
+```
+
 ## Quickstart with FastAPI
 
 ```python

@@ -15,6 +15,14 @@ Building upon Azanian Eagle's `opensentinel-react` playbook, `@azanian-eagle/ope
 npm install @azanian-eagle/opencovenant-react @azanian-eagle/opencovenant-client
 ```
 
+## Running Tests
+
+Execute the native Node.js test runner:
+
+```bash
+npm test
+```
+
 ## Usage
 
 ```tsx

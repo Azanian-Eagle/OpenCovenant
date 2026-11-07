@@ -19,6 +19,14 @@ pnpm add @azanian-eagle/opencovenant-client
 bun add @azanian-eagle/opencovenant-client
 ```
 
+## Running Tests
+
+Execute the native Node.js test runner:
+
+```bash
+npm test
+```
+
 ## Quickstart
 
 ```typescript
