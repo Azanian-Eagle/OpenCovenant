@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "azanian-eagle-opencovenant"
+version = "0.1.0"
+description = "Python SDK & FastAPI guard for OpenCovenant and the Vela language (.vela)"
+readme = "README.md"
+authors = [{ name = "Romeo Mngqibisa", email = "romeomngqibisa@gmail.com" }]
+license = { text = "MIT OR Apache-2.0" }
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+]
+requires-python = ">=3.9"
+
+[project.urls]
+Homepage = "https://github.com/Azanian-Eagle/OpenCovenant"

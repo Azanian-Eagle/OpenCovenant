@@ -1,0 +1,12 @@
+[package]
+name = "vela-typeck"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+description = "Compile-time information-flow taint, ephemeral TTL, and POPIA/GDPR/SARB compliance type-checker"
+
+[dependencies]
+vela-lexer = { path = "../vela-lexer" }
+vela-parser = { path = "../vela-parser" }
+serde.workspace = true

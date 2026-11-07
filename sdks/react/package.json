@@ -1,0 +1,25 @@
+{
+  "name": "@azanian-eagle/opencovenant-react",
+  "version": "0.1.0",
+  "description": "Turnkey React hooks for OpenCovenant and the Vela Language (.vela)",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "commonjs",
+  "scripts": {
+    "test": "node --test test/**/*.test.js"
+  },
+  "dependencies": {
+    "@azanian-eagle/opencovenant-client": "file:../typescript-client"
+  },
+  "keywords": [
+    "react",
+    "opencovenant",
+    "vela",
+    "popia",
+    "gdpr",
+    "compliance",
+    "azanian-eagle"
+  ],
+  "author": "Romeo Mngqibisa <romeomngqibisa@gmail.com> (Azanian Eagle)",
+  "license": "MIT OR Apache-2.0"
+}

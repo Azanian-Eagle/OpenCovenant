@@ -1,0 +1,54 @@
+name: OpenCovenant & Vela Compiler CI
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  test-and-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # 1. Rust Compiler Workspace Checks & Tests
+      - name: Check Formatting & Lints
+        run: |
+          cargo fmt --check
+          cargo clippy --all-targets -- -D warnings
+      - name: Run Compiler Unit Tests
+        run: cargo test --workspace
+
+      # 2. Vela Contract Verification & Polyglot Compilation
+      - name: Verify EduHelp POPIA Sovereignty Contract
+        run: cargo run --bin velac -- check contracts/edtech_popia_guard.vela
+      - name: Generate Polyglot SDKs & SQL RLS
+        run: cargo run --bin velac -- build contracts/edtech_popia_guard.vela --out-dir ./gen
+      - name: Emit Signed Compliance Attestation
+        run: cargo run --bin velac -- audit contracts/edtech_popia_guard.vela
+
+      # 3. TypeScript Client SDK Tests
+      - name: Run TypeScript Client SDK Tests
+        run: |
+          cd sdks/typescript-client
+          npm test
+
+      # 4. React SDK Tests
+      - name: Run React SDK Tests
+        run: |
+          cd sdks/react
+          npm test
+
+      # 5. Python SDK Tests
+      - name: Run Python SDK Tests
+        run: |
+          cd sdks/python
+          PYTHONPATH=. python3 -m unittest discover -s tests -p "test_*.py"

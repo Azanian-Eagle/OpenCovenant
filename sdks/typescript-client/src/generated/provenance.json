@@ -1,0 +1,34 @@
+{
+  "build_artifacts": {
+    "postgres_rls": {
+      "file": "sovereign_rls.sql",
+      "sha256": "980653041dfc342ab888bb82727fd0e355589a140c282165a1637ba1b4bfe151"
+    },
+    "python_middleware": {
+      "file": "opencovenant_guard.py",
+      "sha256": "7dcb48bb23becd5bf5224dd1ff5ef142254abd647e051de615eade3b8607c129"
+    },
+    "typescript_sdk": {
+      "file": "opencovenant_client.ts",
+      "sha256": "3eb0ec1cd46b864a7fc74f9b8d76a35dea480e4fcc677fdd39058ae702593dfa"
+    }
+  },
+  "compiler_engine": "velac v0.1.0",
+  "jurisdiction": "af-south-1",
+  "module": {
+    "covenants_count": 1,
+    "name": "azanian_eagle.eduhelp.sovereignty",
+    "schemas_count": 1,
+    "version": "1.0.0"
+  },
+  "provenance_authority": "Azanian-Eagle/OpenCovenant",
+  "schema_version": "1.0.0",
+  "signer": "Romeo Mngqibisa <romeomngqibisa@gmail.com>",
+  "sovereign_attestation": "VERIFIED_FORMAL_TAINT_AND_JURISDICTION_INVARIANTS",
+  "statutory_frameworks": [
+    "POPIA (Act No. 4 of 2013, South Africa)",
+    "GDPR (Regulation (EU) 2016/679)",
+    "CCPA (California Consumer Privacy Act)",
+    "SARB NPS (South African Reserve Bank National Payment System)"
+  ]
+}
