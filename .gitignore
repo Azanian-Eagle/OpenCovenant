@@ -1,0 +1,10 @@
+/target
+/gen
+**/*.rs.bk
+Cargo.lock
+.DS_Store
+node_modules/
+dist/
+__pycache__/
+*.pyc
+.env
