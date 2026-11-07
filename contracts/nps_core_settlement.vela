@@ -1,0 +1,55 @@
+// File: contracts/nps_core_settlement.vela
+// Azanian Eagle — NPS-Core SARB Formally Verified Double-Entry Settlement Covenant
+module azanian_eagle.nps.settlement version "1.0.0";
+
+import std::regulations::{SARB, POPIA};
+import std::finance::{PAN, RoutingNumber, MonetaryAmount, CurrencyZAR};
+import std::crypto::{blake3_salted, aes256_gcm_encrypt};
+import std::ledger::{double_entry_assert};
+import std::sinks::{SovereignPostgresZA, AuditLogZA, ClearingRailSARB};
+
+schema SettlementTransferPayload {
+  source_pan:         tainted<PAN, POPIA::Section26_SpecialPersonal>,
+  dest_routing:       public<RoutingNumber>,
+  amount_cents:       u64 where amount_cents > 0,
+  ledger_balanced:    bool where ledger_balanced == true,
+  audit_nonce:        public<UUIDv7>
+}
+
+covenant DoubleEntrySettlement(input: SettlementTransferPayload) -> (
+  ledger_db:   SovereignPostgresZA,
+  audit_trail: AuditLogZA,
+  rail_egress: ClearingRailSARB
+) {
+  invariant SARBZeroNetBalance {
+    when input.ledger_balanced == true => forbid_sink(input.source_pan, ClearingRailSARB);
+  }
+
+  let anonymized_pan: sanitized<FixedBytes<32>> = input.source_pan
+    |> blake3_salted(secret_env = "SARB_TOKEN_SALT");
+
+  let encrypted_pan: sanitized<CipherText> = input.source_pan
+    |> aes256_gcm_encrypt(key_env = "SETTLEMENT_VAULT_KEY", aad = input.audit_nonce);
+
+  let verified_entry: sanitized<MonetaryAmount> = input.amount_cents
+    |> double_entry_assert(currency = CurrencyZAR);
+
+  emit ledger_db {
+    pan_token:   anonymized_pan,
+    vault_ct:    encrypted_pan,
+    amount:      verified_entry,
+    nonce:       input.audit_nonce
+  };
+
+  emit audit_trail {
+    pan_token:   anonymized_pan,
+    entry_state: verified_entry,
+    nonce:       input.audit_nonce
+  };
+
+  emit rail_egress {
+    pan_token:   anonymized_pan,
+    routing:     input.dest_routing,
+    amount:      verified_entry
+  };
+}
