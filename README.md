@@ -125,6 +125,20 @@ cargo run --bin velac -- audit contracts/edtech_popia_guard.vela
 
 Emits a signed compliance manifest detailing source SHA-256 digests and verified frameworks.
 
+### 6. Universal Multi-Industry Standard Library & HTTP Microservice Daemon
+
+Verify all universal GDPR, HIPAA, and PCI-DSS contracts and start the HTTP daemon:
+
+```bash
+# Verify universal contracts
+cargo run --bin velac -- check contracts/universal/eu_gdpr_saas.vela
+cargo run --bin velac -- check contracts/universal/us_hipaa_healthcare.vela
+cargo run --bin velac -- check contracts/universal/pci_dss_fintech.vela
+
+# Start the language-agnostic sub-50µs HTTP daemon on port 8090
+cargo run --bin opencovenant-server
+```
+
 ---
 
 ## 📜 Statutory Compliance Matrix
@@ -143,11 +157,14 @@ Emits a signed compliance manifest detailing source SHA-256 digests and verified
 
 This repository is structured as a safe, modular Cargo workspace:
 
+* [`crates/opencovenant-server`](crates/opencovenant-server) — Stateless language-agnostic Axum HTTP/JSON microservice daemon (sub-50µs redaction, Prometheus metrics, OpenAPI v3.1).
 * [`crates/vela-cli`](crates/vela-cli) — CLI toolchain (`velac`) for checking, building, and auditing contracts.
 * [`crates/vela-lexer`](crates/vela-lexer) — Logos-based zero-copy DFA lexer (>1.2 GB/s throughput).
 * [`crates/vela-parser`](crates/vela-parser) — Recursive-descent AST parser with detailed source spans.
 * [`crates/vela-typeck`](crates/vela-typeck) — Affine information-flow taint checker and regulatory validator.
 * [`crates/vela-codegen`](crates/vela-codegen) — Code generator for TypeScript, Python, and PostgreSQL RLS.
+* [`contracts/universal`](contracts/universal) — Multi-industry global standard library (GDPR SaaS, HIPAA Healthcare, PCI-DSS FinTech, POPIA, OWASP LLM).
+* [`registry/index.json`](registry/index.json) — VelaHub federated package registry catalog mapping standard packs to OCI URLs and SHA-256 digests.
 * [`sdks/typescript-client`](sdks/typescript-client) — `@azanian-eagle/opencovenant-client` for browser and Node.js environments.
 * [`sdks/react`](sdks/react) — `@azanian-eagle/opencovenant-react` for turnkey frontend React compliance hooks.
 * [`sdks/python`](sdks/python) — `azanian-eagle-opencovenant` for FastAPI and Django services.

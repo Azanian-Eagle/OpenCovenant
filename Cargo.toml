@@ -6,6 +6,7 @@ members = [
   "crates/vela-typeck",
   "crates/vela-codegen",
   "crates/vela-cli",
+  "crates/opencovenant-server",
 ]
 
 [workspace.package]

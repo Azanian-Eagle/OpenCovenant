@@ -1,0 +1,50 @@
+// File: contracts/universal/eu_gdpr_saas.vela
+// Universal European Union GDPR SaaS Policy Contract
+// Enforcing GDPR Articles 5 (Data Minimisation), 25 (Data Protection by Design), and 44 (Cross-Border Transfers)
+module universal.eu_gdpr_saas version "1.0.0";
+
+import std::regulations::GDPR;
+import std::pii::{EmailAddress, IPAddress, UserIdentifier};
+import std::crypto::{blake3_salted, aes256_gcm_encrypt};
+import std::redact::strip_inline_pii;
+import std::sinks::{EUDatabaseCluster, UntrustedThirdPartyAnalytics, ClientLocalStore};
+
+schema SaasUserSessionPayload {
+  user_uuid:         public<UUIDv7>,
+  email_address:     tainted<EmailAddress, GDPR::Article5_Minimisation>,
+  ip_address:        tainted<IPAddress, GDPR::Article25_PrivacyByDesign>,
+  client_trace:      ephemeral<TracePayload, ttl = 0s, jurisdiction = "eu-central-1">
+}
+
+covenant GdprEgressEnforcement(input: SaasUserSessionPayload) -> (
+  eu_db:      EUDatabaseCluster,
+  analytics:  UntrustedThirdPartyAnalytics,
+  local_store: ClientLocalStore
+) {
+  invariant CrossBorderTransferRestriction {
+    when input.user_uuid != "" => forbid_sink(input.client_trace, UntrustedThirdPartyAnalytics);
+  }
+
+  let anonymised_email_hash: sanitized<FixedBytes<32>> = input.email_address
+    |> blake3_salted(secret_env = "GDPR_SALT_SECRET");
+
+  let encrypted_ip: sanitized<CipherText> = input.ip_address
+    |> aes256_gcm_encrypt(key_env = "GDPR_MASTER_KEY", aad = input.user_uuid);
+
+  let sanitised_trace: sanitized<String> = input.client_trace
+    |> strip_inline_pii(patterns = [EmailAddress, IPAddress]);
+
+  emit eu_db {
+    account_id:  input.user_uuid,
+    email_digest: anonymised_email_hash,
+    ip_cipher:   encrypted_ip
+  };
+
+  emit analytics {
+    telemetry:   sanitised_trace
+  };
+
+  emit local_store {
+    raw_debug:   input.client_trace
+  };
+}

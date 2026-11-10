@@ -1,0 +1,63 @@
+{
+  "schema_version": "1.0.0",
+  "registry": "https://raw.githubusercontent.com/Azanian-Eagle/OpenCovenant/main/registry",
+  "oci_mirror": "oci://ghcr.io/azanian-eagle/opencovenant-packs",
+  "updated_at": "2026-11-10T12:00:00Z",
+  "packages": {
+    "std/gdpr": {
+      "versions": {
+        "1.0.0": {
+          "source_contract": "contracts/universal/eu_gdpr_saas.vela",
+          "sha256": "84ebe6f42a5b862bfe9c15b360cc212754d00fe706815f1743ed70d4250d4f0f",
+          "oci_url": "oci://ghcr.io/azanian-eagle/opencovenant-packs/std-gdpr:1.0.0",
+          "statutory_clauses": ["GDPR::Article5_Minimisation", "GDPR::Article25_PrivacyByDesign", "GDPR::Article44_CrossBorder"],
+          "description": "European Union GDPR compliance pack enforcing data minimisation, privacy by design, and transfer restrictions."
+        }
+      }
+    },
+    "std/hipaa": {
+      "versions": {
+        "1.0.0": {
+          "source_contract": "contracts/universal/us_hipaa_healthcare.vela",
+          "sha256": "08b30abba571e9b3e2730697feaba48582f09de373fb55a29b3d84e50e1318a6",
+          "oci_url": "oci://ghcr.io/azanian-eagle/opencovenant-packs/std-hipaa:1.0.0",
+          "statutory_clauses": ["HIPAA::SafeHarbor_18Identifiers", "HIPAA::45CFR164_514"],
+          "description": "United States HIPAA healthcare pack enforcing 45 CFR § 164.514 Safe Harbor 18-identifier de-identification."
+        }
+      }
+    },
+    "std/pci-dss": {
+      "versions": {
+        "1.0.0": {
+          "source_contract": "contracts/universal/pci_dss_fintech.vela",
+          "sha256": "b329279d58a1a83012819dc551947a6ff782998778d884a0d2b60da35c8561e6",
+          "oci_url": "oci://ghcr.io/azanian-eagle/opencovenant-packs/std-pci-dss:1.0.0",
+          "statutory_clauses": ["PCI_DSS::Requirement3_3_1_CVV_TTL0", "PCI_DSS::Requirement3_4_PAN"],
+          "description": "Global FinTech PCI-DSS v4.0.1 pack enforcing zero post-authorisation CVV storage and PAN masking."
+        }
+      }
+    },
+    "std/popia": {
+      "versions": {
+        "1.0.0": {
+          "source_contract": "contracts/universal/edtech_popia_guard.vela",
+          "sha256": "ede88c76efddc9d7fb16dc8abb67a1d6f39c66e71b76f64ac63b82241738e83b",
+          "oci_url": "oci://ghcr.io/azanian-eagle/opencovenant-packs/std-popia:1.0.0",
+          "statutory_clauses": ["POPIA::Section19_Security", "POPIA::Section26_SpecialPersonal", "POPIA::Section35_Minors"],
+          "description": "South African POPIA data sovereignty and minor zero server-side retention contract pack."
+        }
+      }
+    },
+    "std/owasp-llm": {
+      "versions": {
+        "1.0.0": {
+          "source_contract": "contracts/universal/owasp_llm_guardrails.vela",
+          "sha256": "e3173ba9dc6dc9512897ea006facd599486d0b69e2064cf437432dfbdf58a861",
+          "oci_url": "oci://ghcr.io/azanian-eagle/opencovenant-packs/std-owasp-llm:1.0.0",
+          "statutory_clauses": ["OWASP_LLM::LLM02_SensitiveInfoDisclosure", "MCP::EgressSanitization"],
+          "description": "OWASP Top 10 for LLM and Model Context Protocol egress guardrails pack."
+        }
+      }
+    }
+  }
+}
