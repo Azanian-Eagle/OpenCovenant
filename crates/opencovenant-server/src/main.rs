@@ -178,11 +178,7 @@ async fn metrics_handler(State(state): State<ServerState>) -> impl IntoResponse 
     let micros = state.enforce_duration_micros_total.load(Ordering::Relaxed);
     let uptime_s = state.start_time.elapsed().as_secs();
 
-    let avg_latency = if enforce_reqs > 0 {
-        micros / enforce_reqs
-    } else {
-        0
-    };
+    let avg_latency = micros.checked_div(enforce_reqs).unwrap_or(0);
 
     let body = format!(
         "# HELP opencovenant_requests_total Total HTTP requests received\n\

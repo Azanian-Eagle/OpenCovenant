@@ -199,7 +199,7 @@ cat << 'EOF' > "${TARGET_DIR}/contracts/universal/owasp_llm_guardrails.vela"
 module universal.owasp_llm_guardrails version "1.0.0";
 
 import std::regulations::OWASP_LLM;
-import std::ai::{PromptInput, ToolCallPayload, ApiCredential};
+import std::ai::{PromptInput, ToolCallPayload, ApiCredential, PrivateKey, AuthToken};
 import std::crypto::{blake3_salted, aes256_gcm_encrypt};
 import std::redact::strip_inline_pii;
 import std::sinks::{ModelContextProtocolHost, ExternalLlmApi, AuditLogVault};
@@ -462,11 +462,7 @@ async fn metrics_handler(State(state): State<ServerState>) -> impl IntoResponse 
     let micros = state.enforce_duration_micros_total.load(Ordering::Relaxed);
     let uptime_s = state.start_time.elapsed().as_secs();
 
-    let avg_latency = if enforce_reqs > 0 {
-        micros / enforce_reqs
-    } else {
-        0
-    };
+    let avg_latency = micros.checked_div(enforce_reqs).unwrap_or(0);
 
     let body = format!(
         "# HELP opencovenant_requests_total Total HTTP requests received\n\
@@ -990,7 +986,7 @@ cat << 'EOF' > "${TARGET_DIR}/registry/index.json"
       "versions": {
         "1.0.0": {
           "source_contract": "contracts/universal/owasp_llm_guardrails.vela",
-          "sha256": "e3173ba9dc6dc9512897ea006facd599486d0b69e2064cf437432dfbdf58a861",
+          "sha256": "4f757674d03dda6486f380645e6ff28896e00e14c7d272868d43883c938b2006",
           "oci_url": "oci://ghcr.io/azanian-eagle/opencovenant-packs/std-owasp-llm:1.0.0",
           "statutory_clauses": ["OWASP_LLM::LLM02_SensitiveInfoDisclosure", "MCP::EgressSanitization"],
           "description": "OWASP Top 10 for LLM and Model Context Protocol egress guardrails pack."

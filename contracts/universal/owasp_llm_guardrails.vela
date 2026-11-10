@@ -4,7 +4,7 @@
 module universal.owasp_llm_guardrails version "1.0.0";
 
 import std::regulations::OWASP_LLM;
-import std::ai::{PromptInput, ToolCallPayload, ApiCredential};
+import std::ai::{PromptInput, ToolCallPayload, ApiCredential, PrivateKey, AuthToken};
 import std::crypto::{blake3_salted, aes256_gcm_encrypt};
 import std::redact::strip_inline_pii;
 import std::sinks::{ModelContextProtocolHost, ExternalLlmApi, AuditLogVault};

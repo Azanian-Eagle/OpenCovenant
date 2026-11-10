@@ -52,7 +52,7 @@
       "versions": {
         "1.0.0": {
           "source_contract": "contracts/universal/owasp_llm_guardrails.vela",
-          "sha256": "e3173ba9dc6dc9512897ea006facd599486d0b69e2064cf437432dfbdf58a861",
+          "sha256": "4f757674d03dda6486f380645e6ff28896e00e14c7d272868d43883c938b2006",
           "oci_url": "oci://ghcr.io/azanian-eagle/opencovenant-packs/std-owasp-llm:1.0.0",
           "statutory_clauses": ["OWASP_LLM::LLM02_SensitiveInfoDisclosure", "MCP::EgressSanitization"],
           "description": "OWASP Top 10 for LLM and Model Context Protocol egress guardrails pack."
