@@ -1,0 +1,50 @@
+// File: contracts/universal/us_hipaa_healthcare.vela
+// Universal United States HIPAA Healthcare Sovereignty Contract
+// Enforcing 45 CFR § 164.514 Safe Harbor 18-Identifier De-Identification
+module universal.us_hipaa_healthcare version "1.0.0";
+
+import std::regulations::HIPAA;
+import std::phi::{MedicalRecordNumber, SocialSecurityNumber, PatientName, ClinicalNotes};
+import std::crypto::{blake3_salted, aes256_gcm_encrypt};
+import std::redact::strip_inline_pii;
+import std::sinks::{HIPAACompliantVault, PublicResearchRegistry, ClientLocalStore};
+
+schema PatientRecordPayload {
+  record_id:      public<UUIDv7>,
+  ssn:            tainted<SocialSecurityNumber, HIPAA::SafeHarbor_SSN>,
+  mrn:            tainted<MedicalRecordNumber, HIPAA::SafeHarbor_MRN>,
+  clinical_notes: ephemeral<ClinicalNotes, ttl = 0s, jurisdiction = "us-east-1">
+}
+
+covenant HipaaDeIdentification(input: PatientRecordPayload) -> (
+  ehr_vault:    HIPAACompliantVault,
+  research_pub: PublicResearchRegistry,
+  device_cache: ClientLocalStore
+) {
+  invariant SafeHarborZeroDirectEgress {
+    when input.record_id != "" => forbid_sink(input.clinical_notes, PublicResearchRegistry);
+  }
+
+  let deidentified_mrn_hash: sanitized<FixedBytes<32>> = input.mrn
+    |> blake3_salted(secret_env = "HIPAA_SALT_PEPPER");
+
+  let encrypted_ssn: sanitized<CipherText> = input.ssn
+    |> aes256_gcm_encrypt(key_env = "HIPAA_AES_KEY", aad = input.record_id);
+
+  let deidentified_notes: sanitized<String> = input.clinical_notes
+    |> strip_inline_pii(patterns = [SocialSecurityNumber, MedicalRecordNumber, PatientName]);
+
+  emit ehr_vault {
+    patient_id: input.record_id,
+    ssn_cipher: encrypted_ssn,
+    mrn_digest: deidentified_mrn_hash
+  };
+
+  emit research_pub {
+    clean_notes: deidentified_notes
+  };
+
+  emit device_cache {
+    temp_notes: input.clinical_notes
+  };
+}

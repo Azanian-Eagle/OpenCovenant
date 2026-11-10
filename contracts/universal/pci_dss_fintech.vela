@@ -1,0 +1,52 @@
+// File: contracts/universal/pci_dss_fintech.vela
+// Universal Global FinTech PCI-DSS v4.0.1 Contract
+// Enforcing Requirement 3.3.1: Zero post-authorisation CVV/SAD storage via ttl = 0s
+// Enforcing Requirement 3.4: Primary Account Number (PAN) cryptographic protection & masking
+module universal.pci_dss_fintech version "1.0.0";
+
+import std::regulations::PCI_DSS;
+import std::cardholder::{PrimaryAccountNumber, CardVerificationValue, CardholderName};
+import std::crypto::{blake3_salted, aes256_gcm_encrypt};
+import std::redact::mask_keep_last4;
+import std::sinks::{SovereignLedgerDB, CardPaymentGateway, ClientLocalStore};
+
+schema CardPaymentPayload {
+  transaction_id: public<UUIDv7>,
+  pan:            tainted<PrimaryAccountNumber, PCI_DSS::Requirement3_4_PAN>,
+  cvv:            ephemeral<CardVerificationValue, ttl = 0s, jurisdiction = "global">,
+  cardholder:     public<String>
+}
+
+covenant CardholderDataEgress(input: CardPaymentPayload) -> (
+  ledger_db:     SovereignLedgerDB,
+  gateway:       CardPaymentGateway,
+  terminal_sync: ClientLocalStore
+) {
+  invariant ProhibitPostAuthCvvStorage {
+    when input.transaction_id != "" => forbid_sink(input.cvv, SovereignLedgerDB);
+  }
+
+  let masked_pan_display: sanitized<String> = input.pan
+    |> mask_keep_last4(show_digits = 4);
+
+  let tokenised_pan_vault: sanitized<FixedBytes<32>> = input.pan
+    |> blake3_salted(secret_env = "PCI_TOKEN_VAULT_KEY");
+
+  let encrypted_cvv_transit: sanitized<CipherText> = input.cvv
+    |> aes256_gcm_encrypt(key_env = "GATEWAY_SESSION_KEY", aad = input.transaction_id);
+
+  emit ledger_db {
+    txn_ref:     input.transaction_id,
+    pan_token:   tokenised_pan_vault,
+    pan_display: masked_pan_display,
+    owner:       input.cardholder
+  };
+
+  emit gateway {
+    cvv_ct:      encrypted_cvv_transit
+  };
+
+  emit terminal_sync {
+    ephemeral_cvv: input.cvv
+  };
+}

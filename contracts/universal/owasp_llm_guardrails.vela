@@ -1,0 +1,48 @@
+// File: contracts/universal/owasp_llm_guardrails.vela
+// Universal OWASP Top 10 for LLM Applications & MCP Tool Egress Guardrails
+// Enforcing LLM02 (Sensitive Information Disclosure) and MCP Cross-Tool Taint Boundaries
+module universal.owasp_llm_guardrails version "1.0.0";
+
+import std::regulations::OWASP_LLM;
+import std::ai::{PromptInput, ToolCallPayload, ApiCredential, PrivateKey, AuthToken};
+import std::crypto::{blake3_salted, aes256_gcm_encrypt};
+import std::redact::strip_inline_pii;
+import std::sinks::{ModelContextProtocolHost, ExternalLlmApi, AuditLogVault};
+
+schema AgentSessionPayload {
+  session_id:     public<UUIDv7>,
+  api_key:        tainted<ApiCredential, OWASP_LLM::SensitiveInformationDisclosure>,
+  prompt_buffer:  ephemeral<PromptInput, ttl = 0s, jurisdiction = "global">
+}
+
+covenant McpEgressGuard(input: AgentSessionPayload) -> (
+  mcp_host:   ModelContextProtocolHost,
+  llm_api:    ExternalLlmApi,
+  audit_sink: AuditLogVault
+) {
+  invariant ForbidRawCredentialEgress {
+    when input.session_id != "" => forbid_sink(input.prompt_buffer, ExternalLlmApi);
+  }
+
+  let scrubbed_prompt: sanitized<String> = input.prompt_buffer
+    |> strip_inline_pii(patterns = [ApiCredential, PrivateKey, AuthToken]);
+
+  let blinded_key_audit: sanitized<FixedBytes<32>> = input.api_key
+    |> blake3_salted(secret_env = "MCP_AUDIT_PEPPER");
+
+  let encrypted_creds: sanitized<CipherText> = input.api_key
+    |> aes256_gcm_encrypt(key_env = "MCP_HOST_SEALING_KEY", aad = input.session_id);
+
+  emit mcp_host {
+    sealed_token: encrypted_creds,
+    session:      input.session_id
+  };
+
+  emit llm_api {
+    clean_input: scrubbed_prompt
+  };
+
+  emit audit_sink {
+    key_fingerprint: blinded_key_audit
+  };
+}

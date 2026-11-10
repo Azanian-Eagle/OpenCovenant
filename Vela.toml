@@ -1,0 +1,16 @@
+[package]
+name = "opencovenant-workspace"
+version = "0.1.0"
+authors = ["Romeo Mngqibisa <romeomngqibisa@gmail.com>", "Azanian Eagle"]
+description = "Universal Data Sovereignty, PII Taint Tracking, and Regulatory Guardrails Project"
+
+[dependencies]
+"std/gdpr" = "1.0.0"
+"std/hipaa" = "1.0.0"
+"std/pci-dss" = "1.0.0"
+"std/popia" = "1.0.0"
+
+[targets]
+typescript = "gen/opencovenant_client.ts"
+python = "gen/opencovenant_guard.py"
+postgres_rls = "gen/sovereign_rls.sql"
