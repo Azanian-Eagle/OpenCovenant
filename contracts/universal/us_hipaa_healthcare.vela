@@ -1,0 +1,50 @@
+// File: contracts/universal/us_hipaa_healthcare.vela
+// Universal US Healthcare HIPAA Safe Harbor De-identification Contract
+// Enforcing 45 CFR § 164.514 Safe Harbor 18-identifier de-identification & PHI protection
+module std.universal.hipaa_healthcare version "1.0.0";
+
+import std::regulations::{HIPAA};
+import std::pii::{SocialSecurityNumber, MedicalRecordNumber, PatientNotes};
+import std::crypto::{blake3_salted, aes256_gcm_encrypt};
+import std::redact::{strip_inline_pii};
+import std::sinks::{ClinicalEHRStore, ResearchRegistry, HealthCloud};
+
+schema PatientRecordPayload {
+  mrn:          tainted<MedicalRecordNumber, HIPAA::Identifier18_MRN>,
+  ssn:          tainted<SocialSecurityNumber, HIPAA::Identifier18_SSN>,
+  clinical_raw: ephemeral<PatientNotes, ttl = 0s, jurisdiction = "us-east-1">,
+  encounter_id: public<UUIDv7>
+}
+
+covenant HipaaSafeHarborDeidentify(input: PatientRecordPayload) -> (
+  clinical_store: ClinicalEHRStore,
+  research_store: ResearchRegistry,
+  health_egress:  HealthCloud
+) {
+  invariant ForbidRawNotesPersistence {
+    when input.encounter_id != null => forbid_sink(input.clinical_raw, ClinicalEHRStore);
+  }
+
+  let deidentified_notes: sanitized<String> = input.clinical_raw
+    |> strip_inline_pii(patterns = [SocialSecurityNumber, MedicalRecordNumber]);
+
+  let pseudo_mrn: sanitized<FixedBytes<32>> = input.mrn
+    |> blake3_salted(secret_env = "HIPAA_MRN_PEPPER");
+
+  let encrypted_ssn: sanitized<CipherText> = input.ssn
+    |> aes256_gcm_encrypt(key_env = "HIPAA_VAULT_KEY", aad = input.encounter_id);
+
+  emit clinical_store {
+    encounter: input.encounter_id,
+    enc_ssn:   encrypted_ssn
+  };
+
+  emit research_store {
+    research_id: pseudo_mrn,
+    notes:       deidentified_notes
+  };
+
+  emit health_egress {
+    sanitized_body: deidentified_notes
+  };
+}

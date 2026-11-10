@@ -1,0 +1,50 @@
+// File: contracts/universal/edtech_popia_guard.vela
+// Azanian Eagle — EduHelp AI Sovereign Minor Data Protection Contract
+module azanian_eagle.eduhelp.sovereignty version "1.0.0";
+
+import std::regulations::{POPIA, GDPR};
+import std::pii::{ZA_IDNumber, EmailAddress, MinorTranscript};
+import std::crypto::{blake3_salted, aes256_gcm_encrypt};
+import std::redact::{strip_inline_pii, mask_keep_last4};
+import std::sinks::{ClientLocalStore, SovereignPostgresZA, ExternalLLMProvider};
+
+schema LearnerSessionPayload {
+  learner_sa_id:     tainted<ZA_IDNumber, POPIA::Section26_SpecialPersonal>,
+  guardian_email:    tainted<EmailAddress, POPIA::Section19_Personal>,
+  age_years:         u8 where age_years >= 5 && age_years <= 99,
+  curriculum_prompt: ephemeral<MinorTranscript, ttl = 0s, jurisdiction = "af-south-1">,
+  session_nonce:     public<UUIDv7>
+}
+
+covenant SocraticTutorEgress(input: LearnerSessionPayload) -> (
+  db_record:   SovereignPostgresZA,
+  llm_request: ExternalLLMProvider,
+  local_cache: ClientLocalStore
+) {
+  invariant MinorZeroServerRetention {
+    when input.age_years < 18 => forbid_sink(input.curriculum_prompt, SovereignPostgresZA);
+  }
+
+  let clean_prompt: sanitized<String> = input.curriculum_prompt
+    |> strip_inline_pii(patterns = [ZA_IDNumber, EmailAddress, PhoneZA]);
+
+  let anon_learner_hash: sanitized<FixedBytes<32>> = input.learner_sa_id
+    |> blake3_salted(secret_env = "VELA_SA_ID_PEPPER");
+
+  let encrypted_email: sanitized<CipherText> = input.guardian_email
+    |> aes256_gcm_encrypt(key_env = "PAYLOAD_SECRET_KEY", aad = input.session_nonce);
+
+  emit db_record {
+    learner_hash: anon_learner_hash,
+    guardian_ct:  encrypted_email,
+    session_id:   input.session_nonce
+  };
+
+  emit llm_request {
+    prompt: clean_prompt
+  };
+
+  emit local_cache {
+    transcript: input.curriculum_prompt
+  };
+}
