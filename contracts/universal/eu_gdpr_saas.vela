@@ -1,0 +1,46 @@
+// File: contracts/universal/eu_gdpr_saas.vela
+// Universal EU GDPR SaaS Compliance Contract
+// Enforcing GDPR Articles 5 (Data Minimisation), 25 (Data Protection by Design), and 44 (General Principle for Transfers)
+module std.universal.gdpr_saas version "1.0.0";
+
+import std::regulations::{GDPR};
+import std::pii::{EmailAddress, IPAddress, FullName};
+import std::crypto::{blake3_salted, aes256_gcm_encrypt};
+import std::redact::{strip_inline_pii};
+import std::sinks::{PrimaryDatabaseEU, AnalyticsPipeline, AuditVault};
+
+schema UserAccountPayload {
+  user_id:        public<UUIDv7>,
+  user_email:     tainted<EmailAddress, GDPR::Article9_SpecialCategory>,
+  ip_address:     tainted<IPAddress, GDPR::Article6_LawfulBasis>,
+  session_token:  ephemeral<SessionSecret, ttl = 0s, jurisdiction = "eu-west-1">
+}
+
+covenant GdprDataProtectionByDesign(input: UserAccountPayload) -> (
+  primary_store: PrimaryDatabaseEU,
+  telemetry:     AnalyticsPipeline,
+  audit_log:     AuditVault
+) {
+  invariant ForbidSessionTokenStorage {
+    when input.session_token != null => forbid_sink(input.session_token, PrimaryDatabaseEU);
+  }
+
+  let encrypted_email: sanitized<CipherText> = input.user_email
+    |> aes256_gcm_encrypt(key_env = "GDPR_ENCRYPTION_KEY", aad = input.user_id);
+
+  let pseudonymous_ip: sanitized<FixedBytes<32>> = input.ip_address
+    |> blake3_salted(secret_env = "GDPR_SALT_SECRET");
+
+  emit primary_store {
+    id:        input.user_id,
+    enc_email: encrypted_email
+  };
+
+  emit telemetry {
+    masked_ip: pseudonymous_ip
+  };
+
+  emit audit_log {
+    user_ref: input.user_id
+  };
+}

@@ -1,0 +1,53 @@
+// File: contracts/universal/pci_dss_fintech.vela
+// Universal Global FinTech PCI-DSS v4.0.1 Compliance Contract
+// Enforcing Requirement 3.3.1 zero post-authorization CVV storage via ttl = 0s and PAN tokenisation/masking
+module std.universal.pci_dss_fintech version "1.0.0";
+
+import std::regulations::{PCIDSS};
+import std::pii::{PrimaryAccountNumber, CardVerificationValue, CardholderName};
+import std::crypto::{aes256_gcm_encrypt, token_vault_swap};
+import std::redact::{mask_keep_last4};
+import std::sinks::{TransactionalLedger, PaymentGatewayTransit, FraudAnalysis};
+
+schema CardAuthorizationPayload {
+  pan:             tainted<PrimaryAccountNumber, PCIDSS::Req3_PAN>,
+  cvv:             ephemeral<CardVerificationValue, ttl = 0s, jurisdiction = "global">,
+  cardholder_name: tainted<CardholderName, PCIDSS::Req3_CardholderData>,
+  auth_tx_id:      public<UUIDv7>
+}
+
+covenant PciDssZeroCvvStorage(input: CardAuthorizationPayload) -> (
+  ledger:  TransactionalLedger,
+  gateway: PaymentGatewayTransit,
+  fraud:   FraudAnalysis
+) {
+  invariant ForbidPostAuthCvvPersistence {
+    when input.auth_tx_id != null => forbid_sink(input.cvv, TransactionalLedger);
+  }
+
+  let pan_token: sanitized<UUIDv4> = input.pan
+    |> token_vault_swap(vault_endpoint = "https://vault.internal/v1/tokens");
+
+  let pan_last4: sanitized<String> = input.pan
+    |> mask_keep_last4();
+
+  let encrypted_name: sanitized<CipherText> = input.cardholder_name
+    |> aes256_gcm_encrypt(key_env = "PCI_SECRET_KEY", aad = input.auth_tx_id);
+
+  emit ledger {
+    tx:          input.auth_tx_id,
+    token:       pan_token,
+    display_pan: pan_last4,
+    holder:      encrypted_name
+  };
+
+  emit gateway {
+    tx:          input.auth_tx_id,
+    token:       pan_token
+  };
+
+  emit fraud {
+    tx:          input.auth_tx_id,
+    display_pan: pan_last4
+  };
+}

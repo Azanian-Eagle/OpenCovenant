@@ -125,6 +125,21 @@ cargo run --bin velac -- audit contracts/edtech_popia_guard.vela
 
 Emits a signed compliance manifest detailing source SHA-256 digests and verified frameworks.
 
+### 6. Universal Microservice Daemon (sub-50µs Sidecar)
+
+Run the Axum daemon on port 8090 to enable any language (Go, Java, Python, Node.js, C#, Ruby, PHP) to enforce contracts and redact payloads over local HTTP:
+
+```bash
+cargo run --bin opencovenant-server
+```
+
+Endpoints:
+* `GET /healthz` — Liveness & readiness probe.
+* `GET /metrics` — Prometheus counter metrics.
+* `GET /openapi.json` — Machine-readable OpenAPI v3.1 specification.
+* `POST /v1/covenants/enforce` — Sub-50µs PII/PHI/PAN redaction & masking.
+* `POST /v1/covenants/verify` — Compliance invariant verification & audit receipt.
+
 ---
 
 ## 📜 Statutory Compliance Matrix
@@ -148,6 +163,9 @@ This repository is structured as a safe, modular Cargo workspace:
 * [`crates/vela-parser`](crates/vela-parser) — Recursive-descent AST parser with detailed source spans.
 * [`crates/vela-typeck`](crates/vela-typeck) — Affine information-flow taint checker and regulatory validator.
 * [`crates/vela-codegen`](crates/vela-codegen) — Code generator for TypeScript, Python, and PostgreSQL RLS.
+* [`crates/opencovenant-server`](crates/opencovenant-server) — Stateless Axum HTTP/JSON microservice daemon (sub-50µs redaction & compliance enforcement on port 8090).
+* [`contracts/universal`](contracts/universal) — Universal Multi-Industry Standard Library (EU GDPR, US HIPAA, PCI-DSS v4.0.1, POPIA, OWASP LLM / MCP).
+* [`registry`](registry) — Federated VelaHub Git & OCI package catalog (`Vela.toml` & `registry/index.json`).
 * [`sdks/typescript-client`](sdks/typescript-client) — `@azanian-eagle/opencovenant-client` for browser and Node.js environments.
 * [`sdks/react`](sdks/react) — `@azanian-eagle/opencovenant-react` for turnkey frontend React compliance hooks.
 * [`sdks/python`](sdks/python) — `azanian-eagle-opencovenant` for FastAPI and Django services.

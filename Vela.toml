@@ -1,0 +1,25 @@
+[project]
+name = "my-sovereign-service"
+version = "0.1.0"
+authors = ["Engineering Team <engineering@example.com>"]
+description = "Vela-powered microservice enforcing statutory PII and data sovereignty invariants"
+
+[dependencies]
+"std/gdpr" = "1.0.0"
+"std/hipaa" = "1.0.0"
+"std/pci-dss" = "1.0.0"
+"std/popia" = "1.0.0"
+"std/owasp-llm" = "1.0.0"
+
+[build]
+targets = ["typescript", "python", "postgres_rls"]
+output_dir = "generated"
+
+[build.targets.typescript]
+out_file = "generated/opencovenant_client.ts"
+
+[build.targets.python]
+out_file = "generated/opencovenant_guard.py"
+
+[build.targets.postgres_rls]
+out_file = "generated/sovereign_rls.sql"

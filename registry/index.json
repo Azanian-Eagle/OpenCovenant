@@ -1,0 +1,75 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Azanian-Eagle/OpenCovenant/main/registry/schema.v1.json",
+  "registry_name": "VelaHub",
+  "registry_version": "1.0.0",
+  "description": "Federated static Git & OCI package catalog for universal Vela policy packs",
+  "maintainer": "Azanian-Eagle/OpenCovenant",
+  "oci_registry_base": "oci://ghcr.io/azanian-eagle/opencovenant-packs",
+  "packages": {
+    "std/gdpr": {
+      "latest": "1.0.0",
+      "versions": {
+        "1.0.0": {
+          "description": "EU GDPR Articles 5, 25, and 44 SaaS compliance pack",
+          "license": "MIT OR Apache-2.0",
+          "sha256": "cc8774f742e668d7a5a843a186367565c266d672c268e58319e3df68ed70b14e",
+          "contract_file": "contracts/universal/eu_gdpr_saas.vela",
+          "oci_url": "oci://ghcr.io/azanian-eagle/opencovenant-packs/std-gdpr:1.0.0",
+          "frameworks": ["GDPR"]
+        }
+      }
+    },
+    "std/hipaa": {
+      "latest": "1.0.0",
+      "versions": {
+        "1.0.0": {
+          "description": "US Healthcare HIPAA 45 CFR § 164.514 Safe Harbor 18-identifier de-identification pack",
+          "license": "MIT OR Apache-2.0",
+          "sha256": "7dabf23d4652478d6a305a3892d27060807d83d2e439dd4cee7dcf0418f053cf",
+          "contract_file": "contracts/universal/us_hipaa_healthcare.vela",
+          "oci_url": "oci://ghcr.io/azanian-eagle/opencovenant-packs/std-hipaa:1.0.0",
+          "frameworks": ["HIPAA"]
+        }
+      }
+    },
+    "std/pci-dss": {
+      "latest": "1.0.0",
+      "versions": {
+        "1.0.0": {
+          "description": "Global FinTech PCI-DSS v4.0.1 Requirement 3.3.1 zero post-authorization CVV storage pack",
+          "license": "MIT OR Apache-2.0",
+          "sha256": "adf3667cbe06d29fd812c7f6f3b8c1d3165a0eefb0f04233272611fdf31557c2",
+          "contract_file": "contracts/universal/pci_dss_fintech.vela",
+          "oci_url": "oci://ghcr.io/azanian-eagle/opencovenant-packs/std-pci-dss:1.0.0",
+          "frameworks": ["PCI-DSS"]
+        }
+      }
+    },
+    "std/popia": {
+      "latest": "1.0.0",
+      "versions": {
+        "1.0.0": {
+          "description": "South Africa POPIA Sections 19, 26, and 35 Minor Data Protection pack",
+          "license": "MIT OR Apache-2.0",
+          "sha256": "ede88c76efddc9d7fb16dc8abb67a1d6f39c66e71b76f64ac63b82241738e83b",
+          "contract_file": "contracts/universal/edtech_popia_guard.vela",
+          "oci_url": "oci://ghcr.io/azanian-eagle/opencovenant-packs/std-popia:1.0.0",
+          "frameworks": ["POPIA"]
+        }
+      }
+    },
+    "std/owasp-llm": {
+      "latest": "1.0.0",
+      "versions": {
+        "1.0.0": {
+          "description": "OWASP Top 10 for LLM & Model Context Protocol (MCP) prompt sanitisation & egress guardrails",
+          "license": "MIT OR Apache-2.0",
+          "sha256": "988bb0251163efeafb2737c1eeef6f61dd89b2b0937b3df9bf2bbc687689e0e2",
+          "contract_file": "contracts/universal/owasp_llm_egress.vela",
+          "oci_url": "oci://ghcr.io/azanian-eagle/opencovenant-packs/std-owasp-llm:1.0.0",
+          "frameworks": ["OWASP-LLM", "MCP"]
+        }
+      }
+    }
+  }
+}

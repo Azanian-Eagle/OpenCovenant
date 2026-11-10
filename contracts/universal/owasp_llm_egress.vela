@@ -1,0 +1,46 @@
+// File: contracts/universal/owasp_llm_egress.vela
+// Universal OWASP Top 10 for LLM & MCP Egress Guardrail Contract
+// Enforcing LLM06: Sensitive Information Disclosure prevention & Zero-Retention Prompt Sanitisation
+module std.universal.owasp_llm_egress version "1.0.0";
+
+import std::regulations::{OWASP_LLM};
+import std::pii::{SystemPrompt, UserContext, APIKey, PrivateCredentials};
+import std::crypto::{aes256_gcm_encrypt};
+import std::redact::{strip_inline_pii};
+import std::sinks::{ModelContextProtocolHost, InferenceGateway, EphemeralAudit};
+
+schema McpAgentPromptPayload {
+  session_id:      public<UUIDv7>,
+  raw_user_prompt: ephemeral<UserContext, ttl = 0s, jurisdiction = "local">,
+  caller_api_key:  tainted<APIKey, OWASP_LLM::CredentialProtection>
+}
+
+covenant OwaspPromptSanitisation(input: McpAgentPromptPayload) -> (
+  mcp_egress:  ModelContextProtocolHost,
+  inference:   InferenceGateway,
+  audit_sink:  EphemeralAudit
+) {
+  invariant ForbidRawCredentialExposure {
+    when input.session_id != null => forbid_sink(input.caller_api_key, ModelContextProtocolHost);
+  }
+
+  let sanitized_prompt: sanitized<String> = input.raw_user_prompt
+    |> strip_inline_pii(patterns = [APIKey, PrivateCredentials]);
+
+  let encrypted_key: sanitized<CipherText> = input.caller_api_key
+    |> aes256_gcm_encrypt(key_env = "MCP_KEY_PROTECTION", aad = input.session_id);
+
+  emit mcp_egress {
+    session: input.session_id,
+    prompt:  sanitized_prompt
+  };
+
+  emit inference {
+    prompt:  sanitized_prompt,
+    auth_ct: encrypted_key
+  };
+
+  emit audit_sink {
+    session: input.session_id
+  };
+}
